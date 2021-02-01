@@ -1,0 +1,34 @@
+name: influxdb
+base: core18
+# Get version info from the influxdb part's override-build script
+adopt-info: influxdb
+summary: InfluxDB
+description: |
+  Scalable datastore for metrics, events, and real-time analytics.
+
+grade: devel
+confinement: strict
+
+architectures:
+  - build-on: amd64
+  - build-on: arm64
+
+parts:
+  influxdb:
+    plugin: dump
+    source: https://dl.influxdata.com/platform/nightlies/influx_nightly_linux_amd64.tar.gz
+    override-build: |
+      snapcraftctl build
+      VERSION=$($SNAPCRAFT_PART_BUILD/influxd version | cut -d' ' -f2)
+      snapcraftctl set-version $VERSION
+    stage:
+      - influxd
+
+apps:
+  influxd:
+    command: influxd --bolt-path $SNAP_COMMON/influxd.bolt --engine-path $SNAP_COMMON/engine
+    daemon: simple
+    plugs:
+      - network
+      - network-bind
+

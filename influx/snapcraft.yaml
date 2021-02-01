@@ -1,0 +1,35 @@
+name: influx
+base: core18
+# Get version info from the influx part's override-build script
+adopt-info: influx
+summary: InfluxDB Client
+description: |
+  Commandline client for interacting with InfluxDB
+
+grade: devel
+confinement: strict
+
+architectures:
+  - build-on: amd64
+  - build-on: arm64
+
+parts:
+  influx:
+    plugin: dump
+    source: https://dl.influxdata.com/platform/nightlies/influx_nightly_linux_amd64.tar.gz
+    override-build: |
+      snapcraftctl build
+      VERSION=$($SNAPCRAFT_PART_BUILD/influx version | cut -d' ' -f3)
+      snapcraftctl set-version $VERSION
+    stage:
+      - influx
+
+apps:
+  influx:
+    command: env INFLUX_CONFIGS_PATH=$SNAP_USER_DATA/configs $SNAP/influx
+    plugs:
+      - home
+      - removable-media
+      - network
+
+
