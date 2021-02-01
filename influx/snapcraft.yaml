@@ -16,7 +16,9 @@ architectures:
 parts:
   influx:
     plugin: dump
-    source: https://dl.influxdata.com/platform/nightlies/influx_nightly_linux_amd64.tar.gz
+    source: 
+      - on arm64: https://dl.influxdata.com/platform/nightlies/influx_nightly_linux_arm64.tar.gz
+      - else: https://dl.influxdata.com/platform/nightlies/influx_nightly_linux_amd64.tar.gz
     override-build: |
       snapcraftctl build
       VERSION=$($SNAPCRAFT_PART_BUILD/influx version | cut -d' ' -f3)
