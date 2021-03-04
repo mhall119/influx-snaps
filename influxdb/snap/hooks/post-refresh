@@ -1,0 +1,45 @@
+#!/bin/sh
+set -e
+
+if [ -z "$SNAP_COMMON" ]; then
+    echo "SNAP_COMMON not set. Aborting install hook"
+    exit 1
+fi
+
+if [ ! -d "$SNAP_COMMON" ]; then
+    echo "SNAP_COMMON does not exist. Aborting install hook"
+    exit 1
+fi
+
+# Migrate from root run to snap_daemon
+
+# create the db directory so both snap_daemon and root can acces it. See
+# https://forum.snapcraft.io/t/system-usernames/13386
+DBDIR="$SNAP_COMMON/db"
+if [ ! -d "$DBDIR" ]; then
+    mkdir "$DBDIR"
+    chmod 770 "$DBDIR"
+    chown snap_daemon "$DBDIR"  # keep group as 'root'
+fi
+
+if [ ! -d "$DBDIR/engine" ]; then
+    mv "$SNAP_COMMON/engine" "$DBDIR/engine"
+    chown -R snap_daemon:snap_daemon "$DBDIR/engine"
+fi
+
+if [ ! -f "$DBDIR/influxd.bolt" ]; then
+    mv "$SNAP_COMMON/influxd.bolt" "$DBDIR/influxd.bolt"
+    chown snap_daemon:snap_daemon "$DBDIR/influxd.bolt"
+fi
+
+# Migrate from command line args to config file
+CONFIG_DIR="$SNAP_COMMON/conf"
+CONFIG="$CONFIG_DIR/config.yaml"
+if [ ! -e "$CONFIG_DIR" ]; then
+    mkdir "$CONFIG_DIR"
+    cat > "$CONFIG" <<EOM
+bolt-path: $SNAP_COMMON/db/influxd.bolt
+engine-path: $SNAP_COMMON/db/engine
+EOM
+    chmod 644 "$CONFIG"
+fi
