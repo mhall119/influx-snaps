@@ -19,3 +19,15 @@ if [ ! -d "$DBDIR" ]; then
     chmod 770 "$DBDIR"
     chown snap_daemon "$DBDIR"  # keep group as 'root'
 fi
+
+# Generate minimal config file
+CONFIG_DIR="$SNAP_COMMON/conf"
+CONFIG="$CONFIG_DIR/config.yaml"
+if [ ! -e "$CONFIG_DIR" ]; then
+    mkdir "$CONFIG_DIR"
+    cat > "$CONFIG" <<EOM
+bolt-path: $SNAP_COMMON/db/influxd.bolt
+engine-path: $SNAP_COMMON/db/engine
+EOM
+    chmod 644 "$CONFIG"
+fi

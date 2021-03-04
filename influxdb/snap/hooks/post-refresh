@@ -31,3 +31,15 @@ if [ ! -f "$DBDIR/influxd.bolt" ]; then
     mv "$SNAP_COMMON/influxd.bolt" "$DBDIR/influxd.bolt"
     chown snap_daemon:snap_daemon "$DBDIR/influxd.bolt"
 fi
+
+# Migrate from command line args to config file
+CONFIG_DIR="$SNAP_COMMON/conf"
+CONFIG="$CONFIG_DIR/config.yaml"
+if [ ! -e "$CONFIG_DIR" ]; then
+    mkdir "$CONFIG_DIR"
+    cat > "$CONFIG" <<EOM
+bolt-path: $SNAP_COMMON/db/influxd.bolt
+engine-path: $SNAP_COMMON/db/engine
+EOM
+    chmod 644 "$CONFIG"
+fi

@@ -39,7 +39,9 @@ system-usernames:
 
 apps:
   influxd:
-    command: usr/bin/setpriv --clear-groups --reuid snap_daemon --regid snap_daemon -- $SNAP/influxd --bolt-path $SNAP_COMMON/db/influxd.bolt --engine-path $SNAP_COMMON/db/engine
+    command: usr/bin/setpriv --clear-groups --reuid snap_daemon --regid snap_daemon -- $SNAP/influxd
+    environment:
+      INFLUXD_CONFIG_PATH: $SNAP_COMMON/conf
     daemon: simple
     plugs:
       - network
