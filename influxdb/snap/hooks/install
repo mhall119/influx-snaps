@@ -1,0 +1,21 @@
+#!/bin/sh
+set -e
+
+if [ -z "$SNAP_COMMON" ]; then
+    echo "SNAP_COMMON not set. Aborting install hook"
+    exit 1
+fi
+
+if [ ! -d "$SNAP_COMMON" ]; then
+    echo "SNAP_COMMON does not exist. Aborting install hook"
+    exit 1
+fi
+
+# create the db directory so both snap_daemon and root can acces it. See
+# https://forum.snapcraft.io/t/system-usernames/13386
+DBDIR="$SNAP_COMMON/db"
+if [ ! -d "$DBDIR" ]; then
+    mkdir "$DBDIR"
+    chmod 770 "$DBDIR"
+    chown snap_daemon "$DBDIR"  # keep group as 'root'
+fi

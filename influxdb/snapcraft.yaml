@@ -16,7 +16,7 @@ architectures:
 parts:
   influxdb:
     plugin: dump
-    source: 
+    source:
       - on arm64: https://dl.influxdata.com/platform/nightlies/influx_nightly_linux_arm64.tar.gz
       - else: https://dl.influxdata.com/platform/nightlies/influx_nightly_linux_amd64.tar.gz
     override-build: |
@@ -25,12 +25,28 @@ parts:
       snapcraftctl set-version $VERSION
     stage:
       - influxd
+  staged:
+    plugin: nil
+    stage-packages:
+      - setpriv
+    stage:
+      - -lib        # libcap-ng.so.0.0.0 is in base
+      - -usr/lib    # don't ship empty dir
+      - -usr/share
+
+system-usernames:
+  snap_daemon: shared
 
 apps:
   influxd:
-    command: influxd --bolt-path $SNAP_COMMON/influxd.bolt --engine-path $SNAP_COMMON/engine
+    command: usr/bin/setpriv --clear-groups --reuid snap_daemon --regid snap_daemon -- $SNAP/influxd --bolt-path $SNAP_COMMON/db/influxd.bolt --engine-path $SNAP_COMMON/db/engine
     daemon: simple
     plugs:
       - network
       - network-bind
 
+hooks:
+  install:
+    plugs: []
+  post-refresh:
+    plugs: []
